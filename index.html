@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Proof of Linkage</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0F1419">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Proof of Linkage">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -122,6 +128,26 @@
     @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
     @media(max-width:900px){.flow-g{grid-template-columns:repeat(3,1fr)}.g2,.int-g{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.arch-v{grid-template-columns:1fr;gap:10px}.arch-conn{transform:rotate(90deg);padding:4px}.hero-meta{flex-direction:column;gap:10px}.tx-row{grid-template-columns:28px 1fr auto;font-size:11px}.tx-id,.tx-status{display:none}.nft-grid-3{grid-template-columns:1fr!important}.nft-arrow-col{display:none!important}}
     @media(max-width:600px){.flow-g{grid-template-columns:1fr 1fr}.nav-links a:not(:last-child){display:none}.sec{padding:100px 0}}
+    @keyframes nfcPulse{0%{transform:scale(1);opacity:.6}50%{transform:scale(1.8);opacity:0}100%{transform:scale(2.2);opacity:0}}
+    @keyframes nfcRing{0%{transform:scale(.8);opacity:0}20%{opacity:.5}100%{transform:scale(2.5);opacity:0}}
+    @keyframes nfcGlow{0%{box-shadow:0 0 0 0 rgba(37,99,235,.4)}50%{box-shadow:0 0 30px 10px rgba(37,99,235,.15)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+    @keyframes cardSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes jsonReveal{from{opacity:0;max-height:0}to{opacity:1;max-height:600px}}
+    .nfc-scan-btn{position:relative;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(37,99,235,.12),rgba(37,99,235,.03) 70%,transparent);border:2px solid rgba(37,99,235,.2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:all .3s;color:var(--t2);margin:0 auto}
+    .nfc-scan-btn:hover{border-color:rgba(37,99,235,.45);background:radial-gradient(circle at 50% 45%,rgba(37,99,235,.18),rgba(37,99,235,.05) 70%,transparent);color:var(--t1);transform:scale(1.03)}
+    .nfc-scan-btn:active{transform:scale(.98)}
+    .nfc-scan-btn .ring{position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(37,99,235,.1)}
+    .nfc-pulse-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);pointer-events:none}
+    .nfc-scanning .nfc-pulse-ring:nth-child(1){animation:nfcPulse 1.5s ease-out}
+    .nfc-scanning .nfc-pulse-ring:nth-child(2){animation:nfcRing 1.5s ease-out .2s}
+    .nfc-scanning .nfc-pulse-ring:nth-child(3){animation:nfcRing 1.5s ease-out .4s}
+    .nfc-scanning{animation:nfcGlow 1.5s ease-out;border-color:var(--accent)}
+    .nfc-id-card{animation:cardSlide .5s cubic-bezier(.16,1,.3,1) forwards}
+    .nfc-json-block{animation:jsonReveal .6s cubic-bezier(.16,1,.3,1) forwards;overflow:hidden}
+    .nfc-field{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .nfc-field:last-child{border-bottom:none}
+    .nfc-field-k{font-size:11px;color:var(--t3);font-family:var(--f-mono)}
+    .nfc-field-v{font-size:12px;font-family:var(--f-mono)}
   </style>
 </head>
 <body>
@@ -213,25 +239,53 @@ return(<section className="sec" id="nfts"><div className="ctr"><Rv><div classNam
 </div></Rv></div></section>)}
 
 /* ═══ INTERACT ═══ */
-function Interact({onTxSubmitted}){const[txs,setTxs]=useState([]);const[busy,setBusy]=useState(null);const[err,setErr]=useState(null);
+function Interact({onTxSubmitted}){const[txs,setTxs]=useState([]);const[busy,setBusy]=useState(null);const[err,setErr]=useState(null);const[scanPhase,setScanPhase]=useState('idle');const[scanning,setScanning]=useState(false);
+const NFC_PAYLOAD={version:'1.0',type:'machine-identity',machineId:'TEKSIC-PVT-001',walletAccountId:'0.0.7947839',machineNFT:{tokenId:'0.0.7947870',serial:1},kpiTopicId:'0.0.7947854'};
 const submit=async(endpoint,label)=>{if(busy)return;setBusy(label);setErr(null);try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'}});const data=await r.json();if(!r.ok||!data.success)throw new Error(data.error||'Transaction failed');setTxs(prev=>[{a:label,id:data.transactionId,seq:data.sequenceNumber,t:new Date()},...prev]);if(onTxSubmitted)setTimeout(onTxSubmitted,2000)}catch(e){setErr(e.message)}finally{setBusy(null)}};
+const doScan=()=>{if(scanning)return;setScanning(true);setScanPhase('scanning');setTimeout(()=>setScanPhase('payload'),1500);setTimeout(()=>setScanPhase('identity'),2200);setTimeout(()=>{setScanPhase('actions');setScanning(false)},2800)};
+const resetScan=()=>{setScanPhase('idle');setScanning(false)};
 const scan=()=>submit('/api/submit-scan','Scan Event');const kpi=()=>submit('/api/submit-kpi','Energy KPI');
-return(<section className="sec" id="interact"><div className="ctr"><Rv><div className="sec-l">Try It Live</div></Rv><Rv d={1}><h2 className="sec-t">Real transactions</h2></Rv><Rv d={2}><p className="sec-d">Every button click creates a real transaction on Hedera testnet. No wallet install required. Verify any transaction on HashScan.</p></Rv>
-<Rv d={3}><div className="int-g"><div className="int-p" style={{position:'relative'}}><div className="int-l">How It Works</div>
-<div style={{fontSize:12.5,color:'var(--t3)',lineHeight:1.65,marginBottom:18}}>Click a button below to submit a real HCS consensus message to Hedera testnet. The transaction is signed server-side and submitted to topic <a href={`${C.scan}/topic/${C.topic}`} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:12.5}}>{C.topic}</a>.</div>
-<div style={{display:'grid',gap:9}}><Row k="Operator" v={C.operator} href={`${C.scan}/account/${C.operator}`}/><Row k="Topic" v={C.topic} href={`${C.scan}/topic/${C.topic}`}/><Row k="Network" v={<span style={{color:'var(--amber)'}}>Testnet</span>}/></div>
-<div style={{marginTop:18,padding:12,background:'rgba(79,142,255,.03)',border:'1px solid rgba(79,142,255,.08)',borderRadius:8}}><p style={{fontSize:10.5,fontFamily:'var(--f-mono)',color:'var(--accent)',lineHeight:1.6}}>Each click costs ~0.0001 HBAR and creates an immutable, consensus-timestamped record on the Hedera public ledger.</p></div>
-</div><div className="int-p"><div className="int-l">Actions</div>
-<div><div style={{display:'grid',gap:4,marginBottom:16}}>
-<button className="int-btn" onClick={scan} disabled={!!busy} style={{opacity:busy&&busy!=='Scan Event'?.5:1}}>{busy==='Scan Event'?I.refresh(15,true):I.nfc(15)} Submit Scan Event <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>&#x2192; HCS {C.topic}</span></button>
-<button className="int-btn" onClick={kpi} disabled={!!busy} style={{opacity:busy&&busy!=='Energy KPI'?.5:1}}>{busy==='Energy KPI'?I.refresh(15,true):I.zap(15)} Record Energy KPI <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>&#x2192; HCS {C.topic}</span></button>
-<a href={`${C.scan}/token/${C.machineNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn">{I.cube(15)} View Machine NFT <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{C.machineNFT} {I.ext(9)}</span></a>
-<a href={`${C.scan}/token/${C.waferNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn">{I.shield(15)} View Wafer NFT <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{C.waferNFT} {I.ext(9)}</span></a>
+const jsonHtml=`{
+  <span class="ky">"version"</span>: <span class="sv">"1.0"</span>,
+  <span class="ky">"type"</span>: <span class="sv">"machine-identity"</span>,
+  <span class="ky">"machineId"</span>: <span class="sv">"TEKSIC-PVT-001"</span>,
+  <span class="ky">"walletAccountId"</span>: <span class="sv">"0.0.7947839"</span>,
+  <span class="ky">"machineNFT"</span>: {
+    <span class="ky">"tokenId"</span>: <span class="sv">"0.0.7947870"</span>,
+    <span class="ky">"serial"</span>: <span class="nv">1</span>
+  },
+  <span class="ky">"kpiTopicId"</span>: <span class="sv">"0.0.7947854"</span>
+}`;
+const idFields=[{k:'Machine ID',v:NFC_PAYLOAD.machineId,href:null,color:'var(--t1)',bold:true},{k:'Wallet',v:NFC_PAYLOAD.walletAccountId,href:`${C.scan}/account/${NFC_PAYLOAD.walletAccountId}`},{k:'Machine NFT',v:`${NFC_PAYLOAD.machineNFT.tokenId} #${NFC_PAYLOAD.machineNFT.serial}`,href:`${C.scan}/token/${NFC_PAYLOAD.machineNFT.tokenId}`},{k:'KPI Topic',v:NFC_PAYLOAD.kpiTopicId,href:`${C.scan}/topic/${NFC_PAYLOAD.kpiTopicId}`}];
+return(<section className="sec" id="interact"><div className="ctr"><Rv><div className="sec-l">Try It Live</div></Rv><Rv d={1}><h2 className="sec-t">Scan &rarr; Identity &rarr; Transact</h2></Rv><Rv d={2}><p className="sec-d">Simulate the full NFC scan flow, then submit real transactions to Hedera testnet. Every action creates an immutable on-chain record.</p></Rv>
+<Rv d={3}><div style={{marginTop:48}}>
+{/* ── NFC SCAN BUTTON ── */}
+{scanPhase==='idle'&&<div style={{textAlign:'center',padding:'48px 0'}}><div className="nfc-scan-btn" onClick={doScan} role="button" tabIndex={0}><div className="ring"/>{I.nfc(42)}<span style={{fontFamily:'var(--f-mono)',fontSize:11,letterSpacing:'.04em'}}>Tap to Scan</span></div><p style={{marginTop:20,fontFamily:'var(--f-mono)',fontSize:11,color:'var(--t3)'}}>Simulates reading an NFC tag on TEKSIC-PVT-001</p></div>}
+{/* ── SCANNING ANIMATION ── */}
+{scanPhase==='scanning'&&<div style={{textAlign:'center',padding:'48px 0'}}><div className="nfc-scan-btn nfc-scanning" style={{borderColor:'var(--accent)',cursor:'default'}}><div className="nfc-pulse-ring"/><div className="nfc-pulse-ring"/><div className="nfc-pulse-ring"/>{I.nfc(42)}<span style={{fontFamily:'var(--f-mono)',fontSize:11,color:'var(--accent)'}}>Reading...</span></div></div>}
+{/* ── JSON PAYLOAD REVEAL ── */}
+{(scanPhase==='payload'||scanPhase==='identity'||scanPhase==='actions')&&<div className="nfc-json-block"><div className="nfc-payload" style={{marginTop:0}}><div className="nfc-payload-header"><span style={{width:6,height:6,borderRadius:'50%',background:'var(--green)',display:'inline-block',boxShadow:'0 0 8px var(--green)'}}/> NFC Tag Read &mdash; NDEF Payload Decoded</div><pre dangerouslySetInnerHTML={{__html:jsonHtml}} style={{fontSize:11.5,lineHeight:1.65}}/></div></div>}
+{/* ── MACHINE IDENTITY CARD ── */}
+{(scanPhase==='identity'||scanPhase==='actions')&&<div className="nfc-id-card" style={{marginTop:16}}><div style={{background:'var(--bg-c)',border:'1px solid var(--border)',borderRadius:14,padding:24,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',top:-20,right:-20,width:80,height:80,borderRadius:'50%',background:'var(--accent)',filter:'blur(40px)',opacity:.08,pointerEvents:'none'}}/><div style={{display:'flex',alignItems:'center',gap:12,marginBottom:18}}><div style={{width:40,height:40,borderRadius:10,background:'rgba(79,142,255,.1)',border:'1px solid rgba(79,142,255,.2)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--accent)'}}>{I.hex(20)}</div><div><div style={{fontFamily:'var(--f-head)',fontSize:15,fontWeight:600}}>Machine Identity Card</div><div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--green)',display:'flex',alignItems:'center',gap:5}}><span style={{width:5,height:5,borderRadius:'50%',background:'var(--green)',display:'inline-block'}}/> Verified from NFC</div></div></div><div>{idFields.map((f,i)=><div key={i} className="nfc-field"><span className="nfc-field-k">{f.k}</span>{f.href?<a href={f.href} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:12,fontFamily:'var(--f-mono)'}}>{f.v} {I.ext(9)}</a>:<span className="nfc-field-v" style={{color:f.color||'var(--t2)',fontWeight:f.bold?600:400}}>{f.v}</span>}</div>)}</div></div></div>}
+{/* ── ACTION BUTTONS ── */}
+{scanPhase==='actions'&&<div className="nfc-id-card" style={{marginTop:16}}><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+<button className="int-btn" onClick={scan} disabled={!!busy} style={{opacity:busy&&busy!=='Scan Event'?.5:1,justifyContent:'center'}}>{busy==='Scan Event'?I.refresh(15,true):I.send(15)} Submit Scan Event</button>
+<button className="int-btn" onClick={kpi} disabled={!!busy} style={{opacity:busy&&busy!=='Energy KPI'?.5:1,justifyContent:'center'}}>{busy==='Energy KPI'?I.refresh(15,true):I.zap(15)} Record Energy KPI</button>
 </div>
-{err&&<div style={{padding:10,background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.15)',borderRadius:8,marginBottom:10}}><p style={{fontSize:11,fontFamily:'var(--f-mono)',color:'#ef4444'}}>{err}</p></div>}
+<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+<a href={`${C.scan}/token/${C.machineNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn" style={{justifyContent:'center'}}>{I.cube(14)} Machine NFT {I.ext(9)}</a>
+<a href={`${C.scan}/token/${C.waferNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn" style={{justifyContent:'center'}}>{I.shield(14)} Wafer NFT {I.ext(9)}</a>
 </div>
+<div style={{textAlign:'center',marginTop:14}}><button onClick={resetScan} style={{background:'none',border:'none',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)',cursor:'pointer',padding:'4px 12px',transition:'color .2s'}} onMouseOver={e=>e.target.style.color='var(--t2)'} onMouseOut={e=>e.target.style.color='var(--t3)'}>&larr; Scan Again</button></div>
+{err&&<div style={{padding:10,background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.15)',borderRadius:8,marginTop:10}}><p style={{fontSize:11,fontFamily:'var(--f-mono)',color:'#ef4444'}}>{err}</p></div>}
 {txs.length>0&&<div style={{marginTop:16,borderTop:'1px solid var(--border)',paddingTop:18}}><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>Transaction Log (Real)</div><div style={{display:'grid',gap:6,maxHeight:260,overflowY:'auto'}}>{txs.map((tx,i)=><div key={i} className="tx-e"><div className="tx-eh"><span className="tx-ea">{tx.a}</span><span className="tx-es">{I.check(9)} confirmed</span></div><div className="tx-eid">{tx.id}</div><div style={{marginTop:5,display:'flex',gap:10,alignItems:'center'}}><a href={txUrl(tx.id)} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:10,fontFamily:'var(--f-mono)'}}>HashScan {I.ext(9)}</a><span style={{fontSize:9.5,fontFamily:'var(--f-mono)',color:'var(--t3)'}}>seq #{tx.seq}</span></div></div>)}</div></div>}
-</div></div></Rv></div></section>)}
+</div>}
+{/* ── INFO FOOTER ── */}
+<div style={{marginTop:32,padding:16,background:'rgba(79,142,255,.03)',border:'1px solid rgba(79,142,255,.08)',borderRadius:10,display:'flex',gap:14,alignItems:'flex-start'}}>
+<div style={{flexShrink:0,marginTop:2,color:'var(--accent)',opacity:.6}}>{I.shield(16)}</div>
+<div><p style={{fontSize:11.5,fontFamily:'var(--f-mono)',color:'var(--accent)',lineHeight:1.65,marginBottom:4}}>Real Hedera Testnet Transactions</p><p style={{fontSize:11,color:'var(--t3)',lineHeight:1.6}}>Each action submits a consensus message to HCS topic <a href={`${C.scan}/topic/${C.topic}`} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:11}}>{C.topic}</a>. Transactions cost ~0.0001 HBAR and are immutable. Verify any transaction on <a href={C.scan} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:11}}>HashScan</a>.</p></div>
+</div>
+</div></Rv></div></section>)}
 
 /* ═══ ARCHITECTURE ═══ */
 function Arch(){const layers=[{l:'Physical',t:'Machine Layer',c:'var(--amber)',items:[`SiC PVT Machine (${C.machine})`,'NFC Tag (NTAG215, read-only)','JSON Identity Payload']},{l:'Mobile',t:'Application Layer',c:'var(--accent-2)',items:['Android App / Web App','NFC Reader + JSON Parser','Hedera SDK + HashConnect']},{l:'Blockchain',t:'Hedera Testnet',c:'var(--accent)',items:[`Account ${C.account} (10 HBAR)`,`HCS Topic ${C.topic}`,`NFT ${C.machineNFT} (Machine)`,`NFT ${C.waferNFT} (Wafer)`]}];
@@ -253,6 +307,13 @@ function Footer(){return(<footer className="footer"><div className="ctr"><div cl
 /* ═══ APP ═══ */
 function App(){const refreshRef=useRef(null);return(<React.Fragment><Nav/><Hero/><Flow/><div className="divider"/><Dashboard refreshRef={refreshRef}/><NFTSection/><div className="divider"/><Interact onTxSubmitted={()=>{if(refreshRef.current)refreshRef.current()}}/><Arch/><div className="divider"/><Proof/><Footer/></React.Fragment>)}
 ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
 </script>
 </body>
 </html>
