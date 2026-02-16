@@ -1,0 +1,8 @@
+{
+  "name": "proof-of-linkage",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@hashgraph/sdk": "^2.51.0"
+  }
+}
