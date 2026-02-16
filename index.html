@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proof of Linkage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#060609;--bg-r:#0a0a10;--bg-c:#0e0e16;--bg-c2:#12121c;--border:rgba(255,255,255,0.05);--border-h:rgba(255,255,255,0.1);--accent:#4f8eff;--accent-2:#38bdf8;--green:#34d399;--amber:#fbbf24;--t1:#edeff3;--t2:#8a8f9e;--t3:#484c5e;--f-body:'DM Sans',-apple-system,sans-serif;--f-head:'Syne',sans-serif;--f-mono:'IBM Plex Mono',monospace}
+    html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+    body{font-family:var(--f-body);background:var(--bg);color:var(--t1);overflow-x:hidden}
+    body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+    ::selection{background:var(--accent);color:#fff}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:9px}
+    a{color:inherit}.ctr{max-width:1120px;margin:0 auto;padding:0 24px}
+    .rv{opacity:0;transform:translateY(24px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1)}
+    .rv.vis{opacity:1;transform:translateY(0)}.rvd1{transition-delay:.08s}.rvd2{transition-delay:.16s}.rvd3{transition-delay:.24s}.rvd4{transition-delay:.32s}.rvd5{transition-delay:.4s}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 24px;transition:all .35s}
+    .nav-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:54px}
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+    .nav-logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center}
+    .nav-logo span{font-family:var(--f-head);font-weight:700;font-size:13px;letter-spacing:-.01em}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{font-size:12.5px;color:var(--t3);text-decoration:none;transition:color .2s;letter-spacing:.01em}
+    .nav-links a:hover{color:var(--t1)}
+    .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+    .hero canvas{position:absolute;inset:0;z-index:0}
+    .hero-grad{position:absolute;bottom:0;left:0;right:0;height:260px;background:linear-gradient(transparent,var(--bg));z-index:1}
+    .hero-c{position:relative;z-index:2}
+    .hero-label{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:32px}
+    .hero-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+    .hero h1{font-family:var(--f-head);font-size:clamp(3.2rem,8vw,6.5rem);font-weight:800;line-height:1;letter-spacing:-.045em;max-width:700px}
+    .hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{font-size:1.05rem;line-height:1.7;color:var(--t2);max-width:460px;margin-top:28px;font-weight:300}
+    .hero-btns{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap}
+    .hero-meta{display:flex;gap:36px;margin-top:64px;font-family:var(--f-mono);font-size:11px;color:var(--t3)}
+    .hero-meta strong{color:var(--t2);font-weight:500}
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-body);font-weight:500;font-size:13.5px;padding:11px 22px;border-radius:9px;border:none;cursor:pointer;transition:all .25s;text-decoration:none;white-space:nowrap}
+    .btn-p{background:var(--accent);color:#fff;box-shadow:0 0 0 1px rgba(79,142,255,.25),0 2px 16px rgba(79,142,255,.18)}
+    .btn-p:hover{box-shadow:0 0 0 1px rgba(79,142,255,.45),0 6px 32px rgba(79,142,255,.28);transform:translateY(-1px)}
+    .btn-g{background:transparent;color:var(--t2);box-shadow:inset 0 0 0 1px var(--border)}
+    .btn-g:hover{color:var(--t1);box-shadow:inset 0 0 0 1px var(--border-h)}
+    .btn-sm{padding:7px 14px;font-size:11.5px;border-radius:7px}
+    .sec{padding:140px 0;position:relative}
+    .sec-l{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+    .sec-t{font-family:var(--f-head);font-size:clamp(2rem,4vw,3.2rem);font-weight:700;letter-spacing:-.035em;line-height:1.05}
+    .sec-d{color:var(--t2);font-size:1rem;max-width:440px;margin-top:14px;font-weight:300;line-height:1.65}
+    .flow-g{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;margin-top:72px;background:var(--border);border-radius:16px;overflow:hidden}
+    .flow-s{padding:28px 18px;background:var(--bg-c);transition:background .35s}
+    .flow-s:hover{background:var(--bg-c2)}
+    .flow-n{font-family:var(--f-mono);font-size:10px;color:var(--t3);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+    .flow-n::after{content:'';flex:1;height:1px;background:var(--border)}
+    .flow-i{color:var(--accent);margin-bottom:12px;opacity:.7}
+    .flow-st{font-family:var(--f-head);font-size:13.5px;font-weight:600;margin-bottom:7px;letter-spacing:-.01em}
+    .flow-sd{font-size:12px;color:var(--t3);line-height:1.55}
+    .nfc-payload{margin-top:48px;background:var(--bg-c);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .nfc-payload-header{padding:14px 20px;border-bottom:1px solid var(--border);font-family:var(--f-mono);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+    .nfc-payload pre{padding:20px;font-family:var(--f-mono);font-size:11.5px;line-height:1.65;color:var(--t2);overflow-x:auto;margin:0}
+    .nfc-payload .ky{color:var(--accent)}.nfc-payload .sv{color:var(--green)}.nfc-payload .nv{color:var(--amber)}
+    .g1{display:grid;gap:1px;background:var(--border);border-radius:16px;overflow:hidden}
+    .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+    .gc{background:var(--bg-c);padding:28px;transition:background .3s}.gc:hover{background:var(--bg-c2)}
+    .gc-l{font-family:var(--f-mono);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+    .gc-span{grid-column:1/-1}
+    .gc-big{font-family:var(--f-head);font-size:2.2rem;font-weight:700;letter-spacing:-.03em}
+    .gc-grad{background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .d-msgs{max-height:340px;overflow-y:auto}
+    .d-msg{padding:13px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start;font-size:13px}
+    .d-msg:last-child{border-bottom:none}
+    .d-msg-seq{font-family:var(--f-mono);font-size:10px;color:var(--t3);padding-top:2px}
+    .d-msg-type{font-family:var(--f-mono);font-size:9.5px;font-weight:500;padding:2px 7px;border-radius:3px;display:inline-block}
+    .d-msg-time{font-family:var(--f-mono);font-size:10px;color:var(--t3);white-space:nowrap}
+    .d-msg-body{font-family:var(--f-mono);font-size:10px;color:var(--t3);margin-top:5px;line-height:1.5;word-break:break-all;max-height:48px;overflow:hidden}
+    .stat-v{font-family:var(--f-head);font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
+    .stat-l{font-size:10px;color:var(--t3);margin-top:3px;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.05em}
+    .nft-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(40px);opacity:.1;pointer-events:none}
+    .nft-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-mono);font-size:9px;padding:3px 8px;border-radius:4px;font-weight:500;letter-spacing:.03em}
+    .tx-row{display:grid;grid-template-columns:32px 1fr 200px 80px 80px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;transition:background .2s}
+    .tx-row:hover{background:rgba(255,255,255,.015)}
+    .tx-num{font-family:var(--f-mono);font-size:10px;color:var(--t3);text-align:center}
+    .tx-desc{color:var(--t2)}.tx-id{font-family:var(--f-mono);font-size:10px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tx-status{font-family:var(--f-mono);font-size:9px;color:var(--green);background:rgba(52,211,153,.06);padding:3px 8px;border-radius:3px;text-align:center;text-transform:uppercase;letter-spacing:.04em}
+    .tx-link a{font-family:var(--f-mono);font-size:10px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px}
+    .tx-link a:hover{text-decoration:underline}
+    .int-g{display:grid;grid-template-columns:360px 1fr;background:var(--border);gap:1px;border-radius:16px;overflow:hidden;margin-top:48px}
+    .int-p{background:var(--bg-c);padding:32px}
+    .int-l{font-family:var(--f-mono);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:24px}
+    .int-btn{width:100%;padding:13px 18px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--t2);font-family:var(--f-body);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:9px;text-align:left;text-decoration:none}
+    .int-btn:hover{border-color:var(--accent);color:var(--t1);background:rgba(79,142,255,.03)}
+    .int-btn svg{opacity:.4;flex-shrink:0;transition:all .25s}.int-btn:hover svg{opacity:1;color:var(--accent)}
+    .tx-e{padding:14px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border);border-radius:9px;animation:fadeUp .35s ease}
+    .tx-eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .tx-ea{font-size:12.5px;font-weight:500}
+    .tx-es{font-family:var(--f-mono);font-size:9.5px;color:var(--green);background:rgba(52,211,153,.06);padding:2px 7px;border-radius:3px}
+    .tx-eid{font-family:var(--f-mono);font-size:10px;color:var(--t3);word-break:break-all}
+    .arch-v{margin-top:64px;display:grid;grid-template-columns:1fr 52px 1fr 52px 1fr;align-items:center}
+    .arch-l{background:var(--bg-c);border:1px solid var(--border);border-radius:14px;padding:32px 24px;position:relative;overflow:hidden;transition:border-color .3s}
+    .arch-l:hover{border-color:var(--border-h)}
+    .arch-glow{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;filter:blur(45px);opacity:.12;pointer-events:none}
+    .arch-ll{font-family:var(--f-mono);font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+    .arch-lt{font-family:var(--f-head);font-size:1.05rem;font-weight:600;margin-bottom:10px;letter-spacing:-.01em}
+    .arch-li{list-style:none}.arch-li li{font-size:12px;color:var(--t2);padding:3px 0;display:flex;align-items:center;gap:7px}
+    .arch-conn{display:flex;align-items:center;justify-content:center}
+    .tech-b{display:flex;flex-wrap:wrap;gap:6px;margin-top:44px}
+    .tech-t{font-family:var(--f-mono);font-size:10.5px;color:var(--t3);padding:5px 12px;border-radius:999px;border:1px solid var(--border);transition:all .25s;text-decoration:none}
+    .tech-t:hover{border-color:var(--border-h);color:var(--t2)}
+    .plink{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px}.plink:hover{text-decoration:underline}
+    .footer{border-top:1px solid var(--border);padding:44px 0}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+    .footer-links{display:flex;gap:24px}.footer-links a{font-size:12px;color:var(--t3);text-decoration:none;transition:color .2s}.footer-links a:hover{color:var(--t2)}
+    .footer-bot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}
+    .h-badge{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.06em;color:var(--accent);border:1px solid rgba(79,142,255,.15);padding:4px 10px;border-radius:5px;text-transform:uppercase}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-h),transparent);max-width:300px;margin:0 auto}
+    .sk{background:linear-gradient(90deg,var(--bg-c) 25%,var(--bg-c2) 50%,var(--bg-c) 75%);background-size:200% 100%;animation:sh 1.8s infinite;border-radius:5px}
+    @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @media(max-width:900px){.flow-g{grid-template-columns:repeat(3,1fr)}.g2,.int-g{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.arch-v{grid-template-columns:1fr;gap:10px}.arch-conn{transform:rotate(90deg);padding:4px}.hero-meta{flex-direction:column;gap:10px}.tx-row{grid-template-columns:28px 1fr auto;font-size:11px}.tx-id,.tx-status{display:none}.nft-grid-3{grid-template-columns:1fr!important}.nft-arrow-col{display:none!important}}
+    @media(max-width:600px){.flow-g{grid-template-columns:1fr 1fr}.nav-links a:not(:last-child){display:none}.sec{padding:100px 0}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useCallback,useRef}=React;
+const C={mirror:'https://testnet.mirrornode.hedera.com/api/v1',scan:'https://hashscan.io/testnet',machine:'TEKSIC-PVT-001',operator:'0.0.7947438',account:'0.0.7947839',topic:'0.0.7947854',machineNFT:'0.0.7947870',waferNFT:'0.0.7947888',poll:30000};
+const TXS=[{n:1,d:'Machine wallet creation',tx:'0.0.7947438@1771219625.989146951'},{n:2,d:'HCS topic creation',tx:'0.0.7947438@1771219725.549839099'},{n:3,d:'Topic test message',tx:'0.0.7947438@1771219725.913663369'},{n:4,d:'Machine NFT token class',tx:'0.0.7947438@1771219978.065429373'},{n:5,d:'Machine NFT mint',tx:'0.0.7947438@1771220025.116389147'},{n:6,d:'Wafer NFT token class',tx:'0.0.7947438@1771220200.488311251'},{n:7,d:'Wafer NFT mint',tx:'0.0.7947438@1771220203.992463665'},{n:8,d:'Wafer-machine HCS linkage',tx:'0.0.7947438@1771220207.119591662'},{n:9,d:'Energy KPI anchor',tx:'0.0.7947438@1771220274.240692466'}];
+function txUrl(t){const p=t.split('@'),ts=p[1].split('.');return`${C.scan}/transaction/${p[0]}-${ts[0]}-${ts[1]}`}
+async function mGet(p){try{const r=await fetch(`${C.mirror}${p}`);if(!r.ok)throw 0;return await r.json()}catch{return null}}
+function fmtT(ts){if(!ts)return'\u2014';return new Date(parseFloat(String(ts).split('.')[0])*1000).toLocaleString()}
+function shortT(ts){if(!ts)return'\u2014';return new Date(parseFloat(String(ts).split('.')[0])*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+
+const I={
+  nfc:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M5 9a8 8 0 010 6"/><path d="M8.5 7a11 11 0 010 10"/><path d="M12 5a14 14 0 010 14"/><path d="M15.5 3a17 17 0 010 18"/></svg>,
+  chain:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>,
+  cube:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>,
+  zap:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  shield:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  phone:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>,
+  ext:s=><svg width={s||11} height={s||11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  refresh:(s,sp)=><svg width={s||13} height={s||13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={sp?{animation:'spin .8s linear infinite'}:{}}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>,
+  wallet:s=><svg width={s||16} height={s||16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4z"/></svg>,
+  check:s=><svg width={s||12} height={s||12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  arrow:s=><svg width={s||14} height={s||14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></svg>,
+  send:s=><svg width={s||14} height={s||14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+  dl:s=><svg width={s||14} height={s||14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  hex:s=><svg width={s||18} height={s||18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>,
+};
+
+function useRv(){const r=useRef();useEffect(()=>{const e=r.current;if(!e)return;const o=new IntersectionObserver(([i])=>{if(i.isIntersecting){e.classList.add('vis');o.unobserve(e)}},{threshold:.08,rootMargin:'0px 0px -30px 0px'});o.observe(e);return()=>o.disconnect()},[]);return r}
+function Rv({children,d=0,className='',style={}}){const r=useRv();return<div ref={r} className={`rv ${d?`rvd${d}`:''} ${className}`} style={style}>{children}</div>}
+function Row({k,v,href}){return<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize:11.5,color:'var(--t3)'}}>{k}</span>{href?<a href={href} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:11.5,fontFamily:'var(--f-mono)'}}>{v} {I.ext(9)}</a>:<span style={{fontSize:11.5,fontFamily:'var(--f-mono)',color:'var(--t2)'}}>{typeof v==='string'?v:v}</span>}</div>}
+
+/* ═══ HERO CANVAS ═══ */
+function HeroCanvas(){const ref=useRef();useEffect(()=>{const c=ref.current,ctx=c.getContext('2d');let w,h,nodes,raf;const resize=()=>{w=c.width=window.innerWidth;h=c.height=window.innerHeight};resize();window.addEventListener('resize',resize);const N=Math.min(Math.floor(w*h/20000),70);nodes=Array.from({length:N},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.4}));let mouse={x:w/2,y:h/2};window.addEventListener('mousemove',e=>{mouse={x:e.clientX,y:e.clientY}},{passive:true});function draw(){ctx.clearRect(0,0,w,h);nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1});const grad=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,280);grad.addColorStop(0,'rgba(79,142,255,0.04)');grad.addColorStop(1,'transparent');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(79,142,255,${.05*(1-d/150)})`;ctx.lineWidth=.5;ctx.stroke()}}nodes.forEach(n=>{const dx=n.x-mouse.x,dy=n.y-mouse.y,d=Math.sqrt(dx*dx+dy*dy),glow=d<200?.3*(1-d/200):0;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=`rgba(79,142,255,${.18+glow+n.r*.05})`;ctx.fill();if(glow>.05){ctx.beginPath();ctx.arc(n.x,n.y,n.r+2,0,Math.PI*2);ctx.fillStyle=`rgba(79,142,255,${glow*.3})`;ctx.fill()}});raf=requestAnimationFrame(draw)}draw();return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize)}},[]);return<canvas ref={ref} style={{position:'absolute',inset:0,zIndex:0}}/>}
+
+/* ═══ NAV ═══ */
+function Nav(){const[s,setS]=useState(false);useEffect(()=>{const fn=()=>setS(window.scrollY>50);window.addEventListener('scroll',fn,{passive:true});return()=>window.removeEventListener('scroll',fn)},[]);return(<nav className="nav" style={{background:s?'rgba(6,6,9,.88)':'transparent',backdropFilter:s?'saturate(180%) blur(14px)':'none',borderBottom:s?'1px solid var(--border)':'1px solid transparent'}}><div className="nav-inner"><a href="#" className="nav-logo"><div className="nav-logo-mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div><span>Proof of Linkage</span></a><div className="nav-links"><a href="#flow">Process</a><a href="#dashboard">Dashboard</a><a href="#nfts">NFTs</a><a href="#interact">Interact</a><a href="#proof">Proof</a><a href={`${C.scan}/account/${C.account}`} target="_blank" rel="noopener noreferrer" className="btn btn-g btn-sm" style={{textDecoration:'none'}}>HashScan {I.ext(9)}</a></div></div></nav>)}
+
+/* ═══ HERO ═══ */
+function Hero(){return(<section className="hero"><HeroCanvas/><div className="hero-grad"/><div className="ctr hero-c"><Rv><div className="hero-label"><span className="hero-dot"/>Live on Hedera Testnet &mdash; 9 Verified Transactions</div></Rv><Rv d={1}><h1>Proof of<br/><em>Linkage</em></h1></Rv><Rv d={2}><p className="hero-sub">Verifiable on-chain identity for industrial machines. Connecting physical assets to the Hedera blockchain through NFC, dynamic NFTs, and consensus-anchored energy data.</p></Rv><Rv d={3}><div className="hero-btns"><a href="#dashboard" className="btn btn-p">Live Dashboard {I.arrow()}</a><a href="#interact" className="btn btn-g">Connect Wallet</a></div></Rv><Rv d={4}><div className="hero-meta"><div>Machine <strong>{C.machine}</strong></div><div>Account <strong><a href={`${C.scan}/account/${C.account}`} target="_blank" rel="noopener noreferrer" style={{color:'var(--t2)',textDecoration:'none'}}>{C.account}</a></strong></div><div>Machine NFT <strong><a href={`${C.scan}/token/${C.machineNFT}`} target="_blank" rel="noopener noreferrer" style={{color:'var(--t2)',textDecoration:'none'}}>{C.machineNFT}</a></strong></div><div>Topic <strong><a href={`${C.scan}/topic/${C.topic}`} target="_blank" rel="noopener noreferrer" style={{color:'var(--t2)',textDecoration:'none'}}>{C.topic}</a></strong></div></div></Rv></div></section>)}
+
+/* ═══ HOW IT WORKS + NFC ═══ */
+function Flow(){const steps=[{n:'01',t:'Mount',d:'Tamper-evident NFC tag on machine carries JSON identity payload with on-chain address.',i:I.nfc},{n:'02',t:'Scan',d:'Android app reads NFC tag, authenticates machine identity and timestamps the event.',i:I.phone},{n:'03',t:'Transact',d:'Hedera transaction creates an immutable record of the physical-digital linkage.',i:I.chain},{n:'04',t:'Update',d:'Dynamic NFT representing the machine is updated with the scan event metadata.',i:I.cube},{n:'05',t:'Anchor',d:'Energy and climate KPIs anchored on-chain via Hedera Consensus Service.',i:I.zap},{n:'06',t:'Trace',d:'Wafer NFTs minted and linked to the producing machine for full provenance.',i:I.shield}];
+const nfc=`{
+  <span class="ky">"version"</span>: <span class="sv">"1.0"</span>,
+  <span class="ky">"type"</span>: <span class="sv">"machine-identity"</span>,
+  <span class="ky">"machineId"</span>: <span class="sv">"TEKSIC-PVT-001"</span>,
+  <span class="ky">"walletAccountId"</span>: <span class="sv">"0.0.7947839"</span>,
+  <span class="ky">"machineNFT"</span>: {
+    <span class="ky">"tokenId"</span>: <span class="sv">"0.0.7947870"</span>,
+    <span class="ky">"serial"</span>: <span class="nv">1</span>
+  },
+  <span class="ky">"kpiTopicId"</span>: <span class="sv">"0.0.7947854"</span>
+}`;
+return(<section className="sec" id="flow"><div className="ctr"><Rv><div className="sec-l">Process</div></Rv><Rv d={1}><h2 className="sec-t">How it works</h2></Rv><Rv d={2}><p className="sec-d">From physical machine to verifiable on-chain proof in six steps.</p></Rv><Rv d={3}><div className="flow-g">{steps.map((s,i)=>(<div key={i} className="flow-s"><div className="flow-n">{s.n}</div><div className="flow-i">{s.i(20)}</div><div className="flow-st">{s.t}</div><div className="flow-sd">{s.d}</div></div>))}</div></Rv><Rv d={4}><div className="nfc-payload"><div className="nfc-payload-header">{I.nfc(13)} NFC Tag Identity Payload &mdash; Actual on-tag data</div><pre dangerouslySetInnerHTML={{__html:nfc}}/></div></Rv></div></section>)}
+
+/* ═══ DASHBOARD ═══ */
+function Dashboard(){const[acct,setAcct]=useState(null);const[msgs,setMsgs]=useState([]);const[loading,setLoading]=useState(true);const[spinning,setSpinning]=useState(false);const[upd,setUpd]=useState(null);
+const load=useCallback(async()=>{setSpinning(true);const[a,m]=await Promise.all([mGet(`/accounts/${C.account}`),mGet(`/topics/${C.topic}/messages?order=desc`)]);if(a)setAcct(a);if(m?.messages)setMsgs(m.messages.map(msg=>{try{const t=atob(msg.message);return{...msg,decoded:JSON.parse(t)}}catch{try{return{...msg,decoded:atob(msg.message)}}catch{return{...msg,decoded:null}}}}));setLoading(false);setSpinning(false);setUpd(new Date())},[]);
+useEffect(()=>{load();const i=setInterval(load,C.poll);return()=>clearInterval(i)},[load]);
+const hbar=acct?(acct.balance?.balance/1e8).toFixed(4):'\u2014';const kpis=msgs.filter(m=>m.decoded?.type==='energy-kpi');const latestKpi=kpis.length>0?kpis[0].decoded:null;
+return(<section className="sec" id="dashboard" style={{background:'var(--bg-r)'}}><div className="ctr"><Rv><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:16,marginBottom:48}}><div><div className="sec-l" style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:5,height:5,borderRadius:'50%',background:'var(--green)',boxShadow:'0 0 8px var(--green)'}}/>Live Data</div><h2 className="sec-t">On-chain dashboard</h2></div><div style={{display:'flex',alignItems:'center',gap:10}}>{upd&&<span style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{upd.toLocaleTimeString()}</span>}<button className="btn btn-g btn-sm" onClick={load} disabled={spinning}>{I.refresh(11,spinning)} Refresh</button></div></div></Rv>
+<Rv d={1}><div className="g1 g2">
+<div className="gc"><div className="gc-l">{I.cube(13)} Machine Identity</div><div style={{display:'grid',gap:10}}><Row k="Machine ID" v={C.machine}/><Row k="Wallet" v={C.account} href={`${C.scan}/account/${C.account}`}/><Row k="Machine NFT" v={`${C.machineNFT} #1`} href={`${C.scan}/token/${C.machineNFT}`}/><Row k="Wafer NFT" v={`${C.waferNFT} #1`} href={`${C.scan}/token/${C.waferNFT}`}/><Row k="KPI Topic" v={C.topic} href={`${C.scan}/topic/${C.topic}`}/><Row k="Network" v={<span style={{color:'var(--amber)'}}>Testnet</span>}/></div></div>
+<div className="gc"><div className="gc-l">{I.wallet(13)} Account</div>{loading?<div className="sk" style={{height:44,width:'50%',marginBottom:14}}/>:(<div style={{marginBottom:20}}><span className="gc-big gc-grad">{hbar}</span><span style={{fontSize:13,color:'var(--t3)',marginLeft:7,fontFamily:'var(--f-mono)'}}>HBAR</span></div>)}<div style={{display:'grid',gap:10,marginBottom:20}}><Row k="Operator" v={C.operator} href={`${C.scan}/account/${C.operator}`}/><Row k="Machine Wallet" v={C.account} href={`${C.scan}/account/${C.account}`}/></div>
+{latestKpi&&(<div style={{marginTop:16,padding:16,background:'var(--bg)',borderRadius:10,border:'1px solid var(--border)'}}><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--green)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10,display:'flex',alignItems:'center',gap:6}}>{I.zap(12)} Energy KPI &mdash; On-Chain</div><div style={{display:'flex',alignItems:'baseline',gap:6}}><span style={{fontFamily:'var(--f-head)',fontSize:'1.8rem',fontWeight:700,color:'var(--green)'}}>{latestKpi.kpi?.value}</span><span style={{fontFamily:'var(--f-mono)',fontSize:12,color:'var(--t3)'}}>{latestKpi.kpi?.unit}/cycle</span></div><div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)',marginTop:6}}>Period: {latestKpi.kpi?.period?.split('/')[0]?.slice(0,10)} &mdash; {latestKpi.kpi?.period?.split('/')[1]?.slice(0,10)}</div><div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)',marginTop:2}}>Source: {latestKpi.kpi?.source}</div></div>)}</div>
+<div className="gc gc-span"><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}><div className="gc-l" style={{marginBottom:0}}>{I.send(12)} HCS Topic Messages</div><a href={`${C.scan}/topic/${C.topic}`} target="_blank" rel="noopener noreferrer" className="plink" style={{fontSize:10.5,fontFamily:'var(--f-mono)'}}>View all {I.ext(9)}</a></div>
+{loading?(<div style={{display:'grid',gap:6}}>{[1,2,3].map(i=><div key={i} className="sk" style={{height:44}}/>)}</div>):msgs.length===0?(<div style={{padding:'44px 0',textAlign:'center',color:'var(--t3)'}}><p style={{fontSize:13}}>No messages on this topic yet.</p></div>):(<div className="d-msgs">{msgs.map((msg,i)=>{const isObj=typeof msg.decoded==='object'&&msg.decoded;const type=isObj?(msg.decoded.type||'message'):'raw';const isKpi=type.includes('kpi');const isLink=type.includes('linkage')||type.includes('wafer');const color=isKpi?'var(--green)':isLink?'var(--amber)':'var(--accent)';const bgc=isKpi?'#34d399':isLink?'#fbbf24':'#4f8eff';return(<div key={i} className="d-msg"><div className="d-msg-seq">#{msg.sequence_number}</div><div><span className="d-msg-type" style={{color,background:`color-mix(in srgb, ${bgc} 8%, transparent)`}}>{type}</span>{isObj&&<div className="d-msg-body">{JSON.stringify(msg.decoded,null,2).slice(0,200)}</div>}</div><div className="d-msg-time">{shortT(msg.consensus_timestamp)}</div></div>)})}</div>)}</div>
+</div></Rv>
+<Rv d={2}><div className="g1 g4" style={{marginTop:1}}>{[{v:'9',l:'Transactions'},{v:loading?'...':msgs.length,l:'HCS Messages'},{v:'2',l:'NFTs Minted'},{v:latestKpi?`${latestKpi.kpi?.value} kWh`:'\u2014',l:'Energy/Cycle'}].map((s,i)=>(<div key={i} className="gc" style={{textAlign:'center',padding:22}}><div className="stat-v">{s.v}</div><div className="stat-l">{s.l}</div></div>))}</div></Rv></div></section>)}
+
+/* ═══ NFTs ═══ */
+function NFTSection(){const[mt,setMt]=useState(null);const[mn,setMn]=useState(null);const[wt,setWt]=useState(null);const[wn,setWn]=useState(null);const[ld,setLd]=useState(true);
+useEffect(()=>{Promise.all([mGet(`/tokens/${C.machineNFT}`),mGet(`/tokens/${C.machineNFT}/nfts`),mGet(`/tokens/${C.waferNFT}`),mGet(`/tokens/${C.waferNFT}/nfts`)]).then(([a,b,c,d])=>{if(a)setMt(a);if(b?.nfts?.[0])setMn(b.nfts[0]);if(c)setWt(c);if(d?.nfts?.[0])setWn(d.nfts[0]);setLd(false)})},[]);
+const mmeta=mn?.metadata?atob(mn.metadata):'\u2014';const wmeta=wn?.metadata?atob(wn.metadata):'\u2014';
+function NFTCard({token,nft,meta,tokenId,color,icon,colorHex}){return(<div style={{background:'var(--bg-c)',border:'1px solid var(--border)',borderRadius:14,padding:28,position:'relative',overflow:'hidden'}}><div className="nft-glow" style={{background:color}}/>
+{ld?<div><div className="sk" style={{height:24,width:'60%',marginBottom:16}}/><div className="sk" style={{height:80}}/></div>:(<div>
+<div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}><div style={{width:36,height:36,borderRadius:9,background:`${colorHex}12`,border:`1px solid ${colorHex}25`,display:'flex',alignItems:'center',justifyContent:'center',color}}>{icon}</div><div><div style={{fontFamily:'var(--f-head)',fontSize:15,fontWeight:600}}>{token?.name||'NFT'}</div><div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{token?.symbol} &mdash; Serial #1</div></div></div>
+<div style={{display:'flex',gap:6,marginBottom:18}}><span className="nft-badge" style={{color,background:`${colorHex}08`,border:`1px solid ${colorHex}18`}}>NFT</span><span className="nft-badge" style={{color:'var(--green)',background:'rgba(52,211,153,.06)',border:'1px solid rgba(52,211,153,.12)'}}>Unique</span><span className="nft-badge" style={{color:'var(--t3)',background:'var(--bg)',border:'1px solid var(--border)'}}>Max: {token?.max_supply||'?'}</span></div>
+<div style={{display:'grid',gap:9}}><Row k="Token ID" v={tokenId} href={`${C.scan}/token/${tokenId}`}/><Row k="Type" v={token?.type||'NON_FUNGIBLE_UNIQUE'}/><Row k="Metadata" v={meta}/><Row k="Owner" v={nft?.account_id||'\u2014'} href={nft?.account_id?`${C.scan}/account/${nft.account_id}`:undefined}/></div></div>)}</div>)}
+return(<section className="sec" id="nfts"><div className="ctr"><Rv><div className="sec-l">Digital Identity</div></Rv><Rv d={1}><h2 className="sec-t">On-chain NFTs</h2></Rv><Rv d={2}><p className="sec-d">Dynamic NFTs representing the machine and its wafer output, with provenance linkage.</p></Rv>
+<Rv d={3}><div className="nft-grid-3" style={{display:'grid',gridTemplateColumns:'1fr 60px 1fr',alignItems:'stretch',gap:0,marginTop:48}}>
+<NFTCard token={mt} nft={mn} meta={mmeta} tokenId={C.machineNFT} color="var(--accent)" colorHex="rgba(79,142,255," icon={I.hex(18)}/>
+<div className="nft-arrow-col" style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6}}><div style={{fontFamily:'var(--f-mono)',fontSize:9,color:'var(--t3)',writingMode:'vertical-rl',transform:'rotate(180deg)',letterSpacing:'.05em'}}>PRODUCED BY</div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth="1.5" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+<NFTCard token={wt} nft={wn} meta={wmeta} tokenId={C.waferNFT} color="var(--amber)" colorHex="rgba(251,191,36," icon={I.shield(18)}/>
+</div></Rv></div></section>)}
+
+/* ═══ INTERACT ═══ */
+function Interact(){const[w,setW]=useState('off');const[txs,setTxs]=useState([]);
+const connect=()=>{setW('ing');setTimeout(()=>setW('on'),1400)};const disc=()=>{setW('off');setTxs([])};
+const push=(a,p)=>{const id=`${C.operator}@${Math.floor(Date.now()/1000)}.${String(Math.floor(Math.random()*1e9)).padStart(9,'0')}`;setTxs(prev=>[{a,id,t:new Date()},...prev])};
+const scan=()=>push('Scan Event');const kpi=()=>push('Energy KPI');
+return(<section className="sec" id="interact"><div className="ctr"><Rv><div className="sec-l">Interact</div></Rv><Rv d={1}><h2 className="sec-t">Connect & transact</h2></Rv><Rv d={2}><p className="sec-d">Connect a Hedera wallet to submit on-chain transactions on testnet.</p></Rv>
+<Rv d={3}><div className="int-g"><div className="int-p" style={{position:'relative'}}><div className="int-l">Wallet</div>
+{w==='off'&&<div><p style={{fontSize:12.5,color:'var(--t3)',lineHeight:1.65,marginBottom:22}}>Pair with HashPack to sign Hedera testnet transactions. This demo simulates the HashConnect pairing flow.</p><button className="btn btn-p" onClick={connect} style={{width:'100%',justifyContent:'center'}}>{I.wallet()} Connect Wallet</button><a href="https://www.hashpack.app/" target="_blank" rel="noopener noreferrer" style={{display:'block',textAlign:'center',marginTop:12,fontSize:11,color:'var(--t3)',textDecoration:'none'}}>Get HashPack {I.ext(9)}</a></div>}
+{w==='ing'&&<div style={{textAlign:'center',padding:'40px 0'}}><div style={{display:'inline-block',color:'var(--accent)',marginBottom:10}}>{I.refresh(22,true)}</div><p style={{fontSize:12.5,color:'var(--t3)'}}>Pairing with HashPack...</p></div>}
+{w==='on'&&<div><div style={{background:'rgba(52,211,153,.03)',border:'1px solid rgba(52,211,153,.1)',borderRadius:9,padding:14,marginBottom:14}}><div style={{display:'flex',alignItems:'center',gap:5,marginBottom:10}}><span style={{color:'var(--green)'}}>{I.check(11)}</span><span style={{fontSize:10,fontFamily:'var(--f-mono)',color:'var(--green)',textTransform:'uppercase',letterSpacing:'.05em'}}>Connected</span></div><Row k="Account" v={C.account}/><div style={{height:7}}/><Row k="Balance" v="10.0000 HBAR"/></div><button className="btn btn-g btn-sm" onClick={disc} style={{width:'100%',justifyContent:'center'}}>Disconnect</button></div>}
+</div><div className="int-p"><div className="int-l">Actions</div>
+{w!=='on'?<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:160,color:'var(--t3)',fontSize:12.5}}>Connect wallet to unlock</div>:(<div><div style={{display:'grid',gap:4,marginBottom:20}}>
+<button className="int-btn" onClick={scan}>{I.nfc(15)} Submit Scan Event <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>&#x2192; HCS {C.topic}</span></button>
+<button className="int-btn" onClick={kpi}>{I.zap(15)} Record Energy KPI <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>&#x2192; HCS {C.topic}</span></button>
+<a href={`${C.scan}/token/${C.machineNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn">{I.cube(15)} View Machine NFT <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{C.machineNFT} {I.ext(9)}</span></a>
+<a href={`${C.scan}/token/${C.waferNFT}`} target="_blank" rel="noopener noreferrer" className="int-btn">{I.shield(15)} View Wafer NFT <span style={{marginLeft:'auto',fontFamily:'var(--f-mono)',fontSize:10,color:'var(--t3)'}}>{C.waferNFT} {I.ext(9)}</span></a>
+</div><p style={{fontSize:9.5,color:'var(--t3)',fontFamily:'var(--f-mono)',textAlign:'center'}}>Production uses HashConnect for real Hedera transactions</p></div>)}
+{txs.length>0&&<div style={{marginTop:20,borderTop:'1px solid var(--border)',paddingTop:18}}><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>Transaction Log</div><div style={{display:'grid',gap:6,maxHeight:220,overflowY:'auto'}}>{txs.map((tx,i)=><div key={i} className="tx-e"><div className="tx-eh"><span className="tx-ea">{tx.a}</span><span className="tx-es">{I.check(9)} success</span></div><div className="tx-eid">{tx.id}</div></div>)}</div></div>}
+</div></div></Rv></div></section>)}
+
+/* ═══ ARCHITECTURE ═══ */
+function Arch(){const layers=[{l:'Physical',t:'Machine Layer',c:'var(--amber)',items:[`SiC PVT Machine (${C.machine})`,'NFC Tag (NTAG215, read-only)','JSON Identity Payload']},{l:'Mobile',t:'Application Layer',c:'var(--accent-2)',items:['Android App / Web App','NFC Reader + JSON Parser','Hedera SDK + HashConnect']},{l:'Blockchain',t:'Hedera Testnet',c:'var(--accent)',items:[`Account ${C.account} (10 HBAR)`,`HCS Topic ${C.topic}`,`NFT ${C.machineNFT} (Machine)`,`NFT ${C.waferNFT} (Wafer)`]}];
+return(<section className="sec" id="arch" style={{background:'var(--bg-r)'}}><div className="ctr"><Rv><div className="sec-l">Architecture</div></Rv><Rv d={1}><h2 className="sec-t">System design</h2></Rv><Rv d={2}><p className="sec-d">Three layers connecting physical reality to immutable on-chain records.</p></Rv>
+<Rv d={3}><div className="arch-v">{layers.map((l,i)=>(<React.Fragment key={i}><div className="arch-l"><div className="arch-glow" style={{background:l.c}}/><div className="arch-ll">{l.l}</div><div className="arch-lt">{l.t}</div><ul className="arch-li">{l.items.map((item,j)=><li key={j}><span style={{width:3,height:3,borderRadius:'50%',background:l.c,display:'inline-block',flexShrink:0}}/>{item}</li>)}</ul></div>{i<2&&<div className="arch-conn"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth="1" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 8 19 12 14 16"/></svg></div>}</React.Fragment>))}</div></Rv>
+<Rv d={4}><div className="tech-b">{['Hedera','HCS','HTS','NFC','NTAG215','Android','Node.js','React','Mirror Node API','HashConnect'].map(t=><span key={t} className="tech-t">{t}</span>)}<a href="https://docs.hedera.com/" target="_blank" rel="noopener noreferrer" className="tech-t" style={{color:'var(--accent)',borderColor:'rgba(79,142,255,.15)'}}>Hedera Docs {I.ext(9)}</a></div></Rv></div></section>)}
+
+/* ═══ PROOF PACKAGE ═══ */
+function Proof(){return(<section className="sec" id="proof"><div className="ctr"><Rv><div className="sec-l">Verification</div></Rv><Rv d={1}><h2 className="sec-t">Proof package</h2></Rv><Rv d={2}><p className="sec-d">9 verified on-chain transactions. All independently verifiable on Hedera testnet.</p></Rv>
+<Rv d={3}><div className="g1 g4" style={{marginTop:48}}>{[{v:'9',l:'Transactions'},{v:'2',l:'NFTs Minted'},{v:'3',l:'HCS Messages'},{v:'1',l:'KPI Anchored'}].map((s,i)=>(<div key={i} className="gc" style={{textAlign:'center',padding:24}}><div className="stat-v gc-grad">{s.v}</div><div className="stat-l">{s.l}</div></div>))}</div></Rv>
+<Rv d={4}><div style={{background:'var(--bg-c)',border:'1px solid var(--border)',borderRadius:'0 0 14px 14px',overflow:'hidden',marginTop:1}}>
+<div className="tx-row" style={{borderBottom:'1px solid var(--border)',background:'rgba(255,255,255,.01)'}}><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.08em',textAlign:'center'}}>#</div><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.08em'}}>Description</div><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.08em'}}>Transaction ID</div><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.08em',textAlign:'center'}}>Status</div><div style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.08em',textAlign:'right'}}>Verify</div></div>
+<div style={{maxHeight:440,overflowY:'auto'}}>{TXS.map((t,i)=>(<div key={i} className="tx-row"><div className="tx-num">{t.n}</div><div className="tx-desc">{t.d}</div><div className="tx-id" title={t.tx}>{t.tx}</div><div className="tx-status">Success</div><div className="tx-link" style={{textAlign:'right'}}><a href={txUrl(t.tx)} target="_blank" rel="noopener noreferrer">HashScan {I.ext(9)}</a></div></div>))}</div>
+<div style={{padding:'18px 24px',borderTop:'1px solid var(--border)',textAlign:'center'}}><button className="btn btn-g" onClick={()=>alert('Export coming soon \u2014 will generate a signed JSON proof package with all 9 transaction IDs and verification URIs.')}>{I.dl()} Download Proof Package</button></div></div></Rv></div></section>)}
+
+/* ═══ FOOTER ═══ */
+function Footer(){return(<footer className="footer"><div className="ctr"><div className="footer-inner"><div><span style={{fontFamily:'var(--f-head)',fontWeight:700,fontSize:14,letterSpacing:'-.01em'}}>Proof of Linkage</span><p style={{fontSize:11.5,color:'var(--t3)',marginTop:3}}>Bridging physical machines to the Hedera blockchain.</p></div><div className="footer-links"><a href={`${C.scan}/account/${C.account}`} target="_blank" rel="noopener noreferrer">HashScan</a><a href="https://docs.hedera.com/" target="_blank" rel="noopener noreferrer">Hedera Docs</a><a href="#">GitHub</a><a href="mailto:contact@example.com">Contact</a></div></div><div className="footer-bot"><div style={{display:'flex',gap:8,alignItems:'center'}}><span className="h-badge">Built with Hedera</span><span style={{fontFamily:'var(--f-mono)',fontSize:9.5,color:'var(--amber)',border:'1px solid rgba(251,191,36,.15)',padding:'3px 9px',borderRadius:4,letterSpacing:'.04em'}}>TESTNET</span></div><span style={{fontSize:10.5,color:'var(--t3)'}}>&copy; 2025 TekSiC &times; Proof of Linkage</span></div></div></footer>)}
+
+/* ═══ APP ═══ */
+function App(){return(<React.Fragment><Nav/><Hero/><Flow/><div className="divider"/><Dashboard/><NFTSection/><div className="divider"/><Interact/><Arch/><div className="divider"/><Proof/><Footer/></React.Fragment>)}
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
